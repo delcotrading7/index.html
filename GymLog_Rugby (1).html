@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="GymLog"/>
+<meta name="theme-color" content="#111111"/>
+<title>GymLog Rugby</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --acc:#E24B4A;
+  --surf:#1C1C1E;
+  --surf2:#2C2C2E;
+  --surf3:#3A3A3C;
+  --txt:#F2F2F7;
+  --mut:#AEAEB2;
+  --hint:#636366;
+  --bdr:#38383A;
+  --bdr2:#48484A;
+  --green:#4CAF50;--green-bg:#1A2E1A;--green-bdr:#2E5E2E;
+  --red-bg:#2E1A1A;--red-bdr:#5E2E2E;
+  --r:10px;--rl:16px;
+}
+body{background:#111111;color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;overflow:hidden;height:100vh;height:100dvh;}
+#app{max-width:430px;margin:0 auto;height:100vh;height:100dvh;display:flex;flex-direction:column;position:relative;}
+.screen{display:none;flex-direction:column;flex:1;overflow:hidden;}
+.screen.active{display:flex;}
+.navbar{display:flex;justify-content:space-between;align-items:center;padding:56px 20px 14px;background:var(--surf);border-bottom:0.5px solid var(--bdr);flex-shrink:0;}
+.nav-title{font-size:17px;font-weight:600;color:var(--txt);}
+.nav-back{background:none;border:none;color:var(--acc);font-size:15px;cursor:pointer;display:flex;align-items:center;gap:4px;padding:0;font-family:inherit;}
+.nav-action{background:none;border:none;color:var(--acc);font-size:15px;cursor:pointer;font-weight:400;font-family:inherit;}
+.tabbar{display:flex;border-top:0.5px solid var(--bdr);background:var(--surf);padding-bottom:env(safe-area-inset-bottom,16px);flex-shrink:0;}
+.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 6px;cursor:pointer;background:none;border:none;color:var(--hint);font-size:9px;transition:color .15s;font-family:inherit;}
+.tab-btn.active{color:var(--acc);}
+.tab-btn i{font-size:22px;}
+.scroll{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch;}
+.sec-title{font-size:11px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
+.stats-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:20px;}
+.stat-card{background:var(--surf2);border-radius:var(--r);padding:14px;}
+.stat-lbl{font-size:12px;color:var(--mut);margin-bottom:4px;}
+.stat-val{font-size:22px;font-weight:600;color:var(--txt);}
+.stat-val span{font-size:12px;color:var(--hint);font-weight:400;}
+
+/* HOME */
+.day-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:20px;}
+.day-card{background:var(--surf2);border:0.5px solid var(--bdr);border-radius:var(--rl);padding:16px 14px;cursor:pointer;transition:opacity .15s;active:opacity:.7;}
+.day-card:active{opacity:.7;}
+.day-label{font-size:11px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.day-name{font-size:15px;font-weight:600;color:var(--txt);margin-bottom:8px;line-height:1.3;}
+.day-meta{font-size:12px;color:var(--hint);}
+.day-done{display:inline-flex;align-items:center;gap:4px;background:var(--green-bg);color:var(--green);border-radius:20px;font-size:11px;padding:3px 10px;margin-top:6px;}
+.history-item{background:var(--surf2);border-radius:var(--rl);padding:14px;margin-bottom:8px;}
+.hist-header{display:flex;justify-content:space-between;margin-bottom:6px;align-items:flex-start;gap:8px;}
+.hist-name{font-size:15px;font-weight:600;color:var(--txt);}
+.hist-date{font-size:12px;color:var(--hint);white-space:nowrap;}
+.tag{display:inline-block;font-size:11px;padding:3px 10px;border-radius:20px;background:var(--surf3);color:var(--mut);margin-right:4px;margin-top:2px;}
+.tag.verde{background:var(--green-bg);color:var(--green);}
+
+/* CREATINA */
+.streak-card{background:linear-gradient(135deg,var(--acc) 0%,#C03534 100%);border-radius:var(--rl);padding:18px;margin-bottom:16px;display:flex;align-items:center;gap:14px;}
+.streak-num{font-size:40px;font-weight:700;color:#fff;line-height:1;}
+.streak-label{font-size:14px;color:rgba(255,255,255,.9);font-weight:600;}
+.streak-sub{font-size:12px;color:rgba(255,255,255,.7);margin-top:2px;}
+.crea-hero{background:var(--surf2);border-radius:var(--rl);padding:18px;margin-bottom:16px;}
+.crea-today-lbl{font-size:15px;font-weight:600;color:var(--txt);}
+.crea-today-sub{font-size:12px;color:var(--mut);margin-top:2px;margin-bottom:14px;}
+.toggle-row{display:flex;gap:10px;}
+.toggle-btn{flex:1;padding:13px;border-radius:var(--r);border:1px solid var(--bdr2);background:var(--surf3);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;color:var(--mut);transition:all .15s;font-family:inherit;}
+.toggle-btn.si.active{background:var(--green-bg);border-color:var(--green-bdr);color:var(--green);font-weight:600;}
+.toggle-btn.no.active{background:var(--red-bg);border-color:var(--red-bdr);color:#FF6B6B;font-weight:600;}
+
+/* CALENDAR */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.cal-nav-btn{background:none;border:none;color:var(--mut);cursor:pointer;padding:8px;font-size:20px;display:flex;align-items:center;}
+.cal-month{font-size:15px;font-weight:600;color:var(--txt);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-bottom:14px;}
+.cal-dow{font-size:11px;color:var(--hint);text-align:center;padding-bottom:4px;font-weight:500;}
+.cal-cell{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--mut);cursor:pointer;transition:all .12s;position:relative;}
+.cal-cell.empty,.cal-cell.future{cursor:default;}
+.cal-cell.future{opacity:.25;}
+.cal-cell.today{border:2px solid var(--acc);color:var(--txt);font-weight:700;}
+.cal-cell.taken{background:var(--green-bg);color:var(--green);font-weight:700;}
+.cal-cell.missed{background:var(--red-bg);color:#FF6B6B;}
+.cal-legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+.cal-legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mut);}
+.cal-legend-dot{width:12px;height:12px;border-radius:3px;}
+
+/* SESSION */
+.bloque-title{font-size:11px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:10px 0 8px;border-bottom:0.5px solid var(--bdr);margin-bottom:10px;display:flex;justify-content:space-between;}
+.bloque-badge{font-size:11px;color:var(--hint);font-weight:400;}
+.ex-card{background:var(--surf2);border-radius:var(--rl);padding:14px;margin-bottom:10px;}
+.ex-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;gap:8px;}
+.ex-name{font-size:15px;font-weight:600;color:var(--txt);flex:1;line-height:1.3;}
+.target-chip{display:inline-block;font-size:11px;color:var(--hint);background:var(--surf3);border-radius:20px;padding:2px 8px;margin-top:3px;}
+.ex-swap-btn{background:none;border:none;color:var(--acc);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:3px;flex-shrink:0;padding:0;font-family:inherit;padding-top:2px;}
+.sets-table{width:100%;border-collapse:collapse;}
+.sets-table th{font-size:11px;color:var(--hint);padding-bottom:8px;text-align:left;font-weight:500;}
+.sets-table th:not(:first-child){text-align:center;}
+.set-num{font-size:13px;color:var(--hint);}
+.set-input{width:58px;padding:8px 4px;border:1px solid var(--bdr2);border-radius:var(--r);background:var(--surf3);color:var(--txt);font-size:16px;text-align:center;font-family:inherit;-webkit-appearance:none;}
+.set-input:focus{outline:none;border-color:var(--acc);}
+.add-set-btn{margin-top:10px;width:100%;padding:9px;border:1px dashed var(--bdr2);border-radius:var(--r);background:none;color:var(--mut);font-size:13px;cursor:pointer;font-family:inherit;}
+.ex-note{font-size:12px;color:var(--hint);margin-top:8px;padding-top:8px;border-top:0.5px solid var(--bdr);line-height:1.5;}
+.save-btn{width:100%;padding:16px;background:var(--acc);color:#fff;border:none;border-radius:var(--rl);font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;font-family:inherit;}
+.save-btn:active{opacity:.85;}
+
+/* PROGRESS */
+.prog-ex-item{background:var(--surf2);border-radius:var(--rl);padding:14px;margin-bottom:8px;}
+.prog-ex-name{font-size:15px;font-weight:600;color:var(--txt);}
+.prog-ex-best{font-size:13px;color:var(--mut);margin-top:3px;}
+
+/* COACH */
+.coach-header{padding:56px 16px 12px;background:var(--surf);border-bottom:0.5px solid var(--bdr);flex-shrink:0;}
+.coach-badge{display:flex;align-items:center;gap:10px;}
+.coach-avatar{width:40px;height:40px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.chat-area{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch;}
+.msg{max-width:85%;padding:11px 14px;border-radius:16px;font-size:14px;line-height:1.5;}
+.msg.ai{background:var(--surf2);color:var(--txt);align-self:flex-start;border-bottom-left-radius:4px;}
+.msg.user{background:var(--acc);color:#fff;align-self:flex-end;border-bottom-right-radius:4px;}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+.msg.loading i{animation:pulse 1s infinite;}
+.chat-input-row{display:flex;gap:8px;padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));border-top:0.5px solid var(--bdr);background:var(--surf);flex-shrink:0;}
+.chat-input{flex:1;padding:10px 14px;border:1px solid var(--bdr2);border-radius:22px;background:var(--surf2);color:var(--txt);font-size:15px;resize:none;height:42px;outline:none;font-family:inherit;}
+.chat-input:focus{border-color:var(--acc);}
+.chat-send{width:42px;height:42px;border-radius:50%;background:var(--acc);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.quick-btns{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 10px;}
+.quick-btn{font-size:12px;padding:7px 12px;border:1px solid var(--bdr2);border-radius:20px;background:var(--surf2);color:var(--mut);cursor:pointer;white-space:nowrap;font-family:inherit;}
+.quick-btn:active{background:var(--surf3);}
+
+/* WIDGET SCREEN */
+.widget-section{background:var(--surf2);border-radius:var(--rl);padding:18px;margin-bottom:14px;}
+.widget-section-title{font-size:15px;font-weight:600;color:var(--txt);margin-bottom:8px;}
+.widget-section-sub{font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:14px;}
+.widget-preview{width:160px;height:160px;border-radius:24px;background:linear-gradient(135deg,#1C1C1E 0%,#2C2C2E 100%);padding:16px;display:flex;flex-direction:column;justify-content:space-between;margin:0 auto 16px;box-shadow:0 8px 32px rgba(0,0,0,.5);}
+.wp-top{display:flex;align-items:center;gap:8px;}
+.wp-icon{width:30px;height:30px;border-radius:8px;background:var(--acc);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.wp-app{font-size:10px;color:rgba(255,255,255,.4);}
+.wp-title{font-size:13px;color:#fff;font-weight:600;}
+.wp-status{text-align:center;}
+.wp-emoji{font-size:30px;}
+.wp-status-txt{font-size:12px;color:rgba(255,255,255,.8);margin-top:3px;}
+.wp-bottom{display:flex;justify-content:space-between;align-items:flex-end;}
+.wp-streak{font-size:22px;font-weight:700;color:#fff;line-height:1;}
+.wp-streak-lbl{font-size:9px;color:rgba(255,255,255,.4);}
+.wp-date{font-size:10px;color:rgba(255,255,255,.3);}
+.steps-list{list-style:none;}
+.steps-list li{display:flex;gap:10px;font-size:13px;color:var(--mut);padding:8px 0;border-bottom:0.5px solid var(--bdr);line-height:1.5;}
+.steps-list li:last-child{border-bottom:none;}
+.step-num{background:var(--acc);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px;}
+.copy-btn{width:100%;padding:14px;border:1px solid var(--bdr2);border-radius:var(--r);background:var(--surf3);color:var(--txt);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;font-weight:500;}
+.copy-btn:active{opacity:.8;}
+
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#F2F2F7;color:#111;padding:11px 20px;border-radius:22px;font-size:14px;font-weight:500;display:none;z-index:999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.4);}
+.toast.show{display:block;animation:fup .2s ease;}
+@keyframes fup{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- HOME -->
+<div class="screen active" id="s-home">
+  <div class="navbar">
+    <span class="nav-title">GymLog <span style="color:var(--acc)">Rugby</span></span>
+    <i class="ti ti-ball-rugby" style="font-size:22px;color:var(--acc)"></i>
+  </div>
+  <div class="scroll">
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-lbl">Sesiones esta semana</div><div class="stat-val" id="stat-week">0</div></div>
+      <div class="stat-card"><div class="stat-lbl">Racha creatina 🔥</div><div class="stat-val" id="stat-streak">0 <span>días</span></div></div>
+    </div>
+    <div class="sec-title">Mi rutina — 4 días</div>
+    <div class="day-grid" id="day-grid"></div>
+    <div class="sec-title">Historial reciente</div>
+    <div id="hist-list"><div style="color:var(--hint);font-size:14px;text-align:center;padding:24px 0">Aún no hay sesiones.<br>¡Empezá el primero!</div></div>
+  </div>
+  <div class="tabbar">
+    <button class="tab-btn active" onclick="tab('home')"><i class="ti ti-home"></i>Inicio</button>
+    <button class="tab-btn" onclick="tab('creatina')"><i class="ti ti-pill"></i>Creatina</button>
+    <button class="tab-btn" onclick="tab('progress')"><i class="ti ti-chart-bar"></i>Progreso</button>
+    <button class="tab-btn" onclick="tab('coach')"><i class="ti ti-message-bolt"></i>Coach</button>
+  </div>
+</div>
+
+<!-- CREATINA -->
+<div class="screen" id="s-creatina">
+  <div class="navbar">
+    <span class="nav-title">Creatina 💊</span>
+    <button class="nav-action" onclick="tab('widget')">Widget →</button>
+  </div>
+  <div class="scroll">
+    <div id="streak-card-container"></div>
+    <div class="crea-hero">
+      <div class="crea-today-lbl">Hoy, <span id="today-label"></span> <span id="today-status-icon"></span></div>
+      <div class="crea-today-sub">¿Tomaste la creatina hoy?</div>
+      <div class="toggle-row">
+        <button class="toggle-btn si" id="btn-si" onclick="markToday(true)"><i class="ti ti-check"></i> Sí, tomé</button>
+        <button class="toggle-btn no" id="btn-no" onclick="markToday(false)"><i class="ti ti-x"></i> No tomé</button>
+      </div>
+    </div>
+    <div class="cal-nav">
+      <button class="cal-nav-btn" onclick="prevMonth()"><i class="ti ti-chevron-left"></i></button>
+      <span class="cal-month" id="cal-month-label"></span>
+      <button class="cal-nav-btn" onclick="nextMonth()"><i class="ti ti-chevron-right"></i></button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="cal-legend">
+      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--green-bg);border:1px solid var(--green-bdr)"></div>Tomé</div>
+      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--red-bg);border:1px solid var(--red-bdr)"></div>No tomé</div>
+      <div class="cal-legend-item"><div class="cal-legend-dot" style="border:2px solid var(--acc)"></div>Hoy</div>
+    </div>
+    <div class="stats-row" style="margin-bottom:0">
+      <div class="stat-card"><div class="stat-lbl">Este mes</div><div class="stat-val" id="crea-month">0 <span>días</span></div></div>
+      <div class="stat-card"><div class="stat-lbl">Consistencia</div><div class="stat-val" id="crea-pct">—</div></div>
+    </div>
+    <div style="height:16px"></div>
+  </div>
+  <div class="tabbar">
+    <button class="tab-btn" onclick="tab('home')"><i class="ti ti-home"></i>Inicio</button>
+    <button class="tab-btn active" onclick="tab('creatina')"><i class="ti ti-pill"></i>Creatina</button>
+    <button class="tab-btn" onclick="tab('progress')"><i class="ti ti-chart-bar"></i>Progreso</button>
+    <button class="tab-btn" onclick="tab('coach')"><i class="ti ti-message-bolt"></i>Coach</button>
+  </div>
+</div>
+
+<!-- WIDGET -->
+<div class="screen" id="s-widget">
+  <div class="navbar">
+    <button class="nav-back" onclick="tab('creatina')"><i class="ti ti-chevron-left"></i> Atrás</button>
+    <span class="nav-title">Widget iPhone</span>
+    <span style="width:60px"></span>
+  </div>
+  <div class="scroll">
+    <div class="widget-section">
+      <div class="widget-section-title">Preview del widget</div>
+      <div class="widget-preview">
+        <div class="wp-top">
+          <div class="wp-icon"><i class="ti ti-pill" style="font-size:15px;color:#fff"></i></div>
+          <div><div class="wp-app">GymLog</div><div class="wp-title">Creatina</div></div>
+        </div>
+        <div class="wp-status">
+          <div class="wp-emoji" id="wp-emoji">❓</div>
+          <div class="wp-status-txt" id="wp-status-txt">¿Ya tomaste hoy?</div>
+        </div>
+        <div class="wp-bottom">
+          <div><div class="wp-streak" id="wp-streak">0</div><div class="wp-streak-lbl">días racha</div></div>
+          <div class="wp-date" id="wp-date"></div>
+        </div>
+      </div>
+    </div>
+    <div class="widget-section">
+      <div class="widget-section-title">Cómo instalarlo</div>
+      <div class="widget-section-sub">Usá la app gratuita <strong style="color:var(--txt)">Scriptable</strong> de la App Store.</div>
+      <ul class="steps-list">
+        <li><span class="step-num">1</span><span>Instalá <strong style="color:var(--txt)">Scriptable</strong> desde la App Store (gratis).</span></li>
+        <li><span class="step-num">2</span><span>Abrí Scriptable y tocá <strong style="color:var(--txt)">+</strong> para crear un script nuevo.</span></li>
+        <li><span class="step-num">3</span><span>Copiá el código de abajo y pegalo. Guardalo como <em style="color:var(--txt)">"Creatina"</em>.</span></li>
+        <li><span class="step-num">4</span><span>Mantené presionada la pantalla de inicio → <strong style="color:var(--txt)">+</strong> → buscá Scriptable → tamaño pequeño.</span></li>
+        <li><span class="step-num">5</span><span>En "Script" elegí <em style="color:var(--txt)">Creatina</em> y en "When Interacting" elegí <em style="color:var(--txt)">Run Script</em>.</span></li>
+        <li><span class="step-num">6</span><span>¡Listo! Al tocar el widget marcás la creatina directo desde la pantalla de inicio. 🎉</span></li>
+      </ul>
+    </div>
+    <div class="widget-section">
+      <div class="widget-section-title">Código del widget</div>
+      <div class="widget-section-sub">Copiá y pegá en Scriptable.</div>
+      <button class="copy-btn" onclick="copyScript()"><i class="ti ti-copy"></i> Copiar código del widget</button>
+    </div>
+    <div style="height:16px"></div>
+  </div>
+</div>
+
+<!-- SESSION -->
+<div class="screen" id="s-session">
+  <div class="navbar">
+    <button class="nav-back" onclick="back()"><i class="ti ti-chevron-left"></i> Atrás</button>
+    <span class="nav-title" id="sess-title">Día 1</span>
+    <span style="width:60px"></span>
+  </div>
+  <div class="scroll" id="sess-content"></div>
+</div>
+
+<!-- PROGRESS -->
+<div class="screen" id="s-progress">
+  <div class="navbar"><span class="nav-title">Mi progreso</span></div>
+  <div class="scroll">
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-lbl">Sesiones totales</div><div class="stat-val" id="ps-total">0</div></div>
+      <div class="stat-card"><div class="stat-lbl">Ejercicios únicos</div><div class="stat-val" id="ps-exs">0</div></div>
+    </div>
+    <div class="sec-title">Mejores marcas por ejercicio</div>
+    <div id="bests-list"><div style="color:var(--hint);font-size:14px;text-align:center;padding:24px 0">Registrá sesiones con peso<br>para ver tus marcas aquí.</div></div>
+    <div style="height:16px"></div>
+  </div>
+  <div class="tabbar">
+    <button class="tab-btn" onclick="tab('home')"><i class="ti ti-home"></i>Inicio</button>
+    <button class="tab-btn" onclick="tab('creatina')"><i class="ti ti-pill"></i>Creatina</button>
+    <button class="tab-btn active" onclick="tab('progress')"><i class="ti ti-chart-bar"></i>Progreso</button>
+    <button class="tab-btn" onclick="tab('coach')"><i class="ti ti-message-bolt"></i>Coach</button>
+  </div>
+</div>
+
+<!-- COACH -->
+<div class="screen" id="s-coach">
+  <div class="coach-header">
+    <div class="coach-badge">
+      <div class="coach-avatar"><i class="ti ti-brain" style="font-size:20px;color:#fff"></i></div>
+      <div>
+        <div style="font-size:15px;font-weight:600;color:var(--txt)">Coach IA</div>
+        <div style="font-size:12px;color:var(--mut)">Rugby & Fuerza · Siempre disponible</div>
+      </div>
+    </div>
+  </div>
+  <div class="chat-area" id="chat-area">
+    <div class="msg ai">¡Hola! Soy tu entrenador especializado en rugby y fuerza. Conozco tu rutina de 4 días y tu historial. ¿En qué te puedo ayudar hoy?</div>
+  </div>
+  <div class="quick-btns" id="quick-btns">
+    <button class="quick-btn" onclick="quickMsg('¿Cómo puedo progresar más rápido en fuerza?')">Progresar más rápido</button>
+    <button class="quick-btn" onclick="quickMsg('Cambiame un ejercicio que no me gusta')">Cambiar ejercicio</button>
+    <button class="quick-btn" onclick="quickMsg('¿Cuánto peso debería agregar esta semana?')">¿Cuánto peso sumar?</button>
+    <button class="quick-btn" onclick="quickMsg('¿La creatina me ayuda para el rugby?')">Creatina y rugby</button>
+    <button class="quick-btn" onclick="quickMsg('Dame un plan de recuperación para el día siguiente al entrenamiento')">Recuperación</button>
+  </div>
+  <div class="chat-input-row">
+    <textarea class="chat-input" id="chat-in" placeholder="Preguntale al coach..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"></textarea>
+    <button class="chat-send" onclick="sendMsg()"><i class="ti ti-send" style="font-size:18px"></i></button>
+  </div>
+  <div class="tabbar">
+    <button class="tab-btn" onclick="tab('home')"><i class="ti ti-home"></i>Inicio</button>
+    <button class="tab-btn" onclick="tab('creatina')"><i class="ti ti-pill"></i>Creatina</button>
+    <button class="tab-btn" onclick="tab('progress')"><i class="ti ti-chart-bar"></i>Progreso</button>
+    <button class="tab-btn active" onclick="tab('coach')"><i class="ti ti-message-bolt"></i>Coach</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+</div>
+
+<script>
+const DB_KEY='gymlog_rugby_v3';
+let db=(()=>{try{return JSON.parse(localStorage.getItem(DB_KEY))||{workouts:[],creatina:{},routine:null};}catch(e){return{workouts:[],creatina:{},routine:null};}})();
+if(!db.creatina)db.creatina={};
+if(!db.routine)db.routine=getDefaultRoutine();
+let chatHistory=[];
+let currentDay=null;
+const now=new Date();
+let calYear=now.getFullYear(),calMonth=now.getMonth();
+
+function todayKey(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+function dateKey(y,m,d){return y+'-'+(m+1)+'-'+d;}
+function saveDb(){localStorage.setItem(DB_KEY,JSON.stringify(db));}
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('s-'+id).classList.add('active');}
+function tab(id){
+  show(id);
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  const activeTabBar=document.querySelectorAll('#s-'+id+' .tab-btn');
+  const tabMap={home:0,creatina:1,progress:2,coach:3};
+  if(tabMap[id]!==undefined&&activeTabBar[tabMap[id]])activeTabBar[tabMap[id]].classList.add('active');
+  if(id==='home')renderHome();
+  if(id==='creatina')renderCreatina();
+  if(id==='progress')renderProgress();
+  if(id==='widget')renderWidgetPreview();
+}
+function back(){show('home');renderHome();}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+
+function calcStreak(){
+  let streak=0,d=new Date();
+  for(let i=0;i<365;i++){
+    const k=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+    if(db.creatina[k]===true){streak++;d.setDate(d.getDate()-1);}else break;
+  }
+  return streak;
+}
+function calcMonthStats(y,m){
+  const today=new Date();const dim=new Date(y,m+1,0).getDate();
+  let taken=0,total=0;
+  for(let d=1;d<=dim;d++){const k=dateKey(y,m,d);const cd=new Date(y,m,d);if(cd>today)break;total++;if(db.creatina[k]===true)taken++;}
+  return{taken,total};
+}
+
+function markToday(val){
+  db.creatina[todayKey()]=val;saveDb();renderCreatina();renderHome();
+  toast(val?'✅ ¡Creatina registrada!':'❌ Marcado como no tomada');
+}
+
+function renderCreatina(){
+  const k=todayKey();const val=db.creatina[k];
+  const d=new Date();
+  document.getElementById('today-label').textContent=d.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('today-status-icon').textContent=val===true?'✅':val===false?'❌':'';
+  document.getElementById('btn-si').className='toggle-btn si'+(val===true?' active':'');
+  document.getElementById('btn-no').className='toggle-btn no'+(val===false?' active':'');
+  const streak=calcStreak();
+  const sc=document.getElementById('streak-card-container');
+  sc.innerHTML=streak>0?`<div class="streak-card"><div class="streak-num">🔥${streak}</div><div><div class="streak-label">${streak===1?'día de racha':streak+' días consecutivos'}</div><div class="streak-sub">¡La consistencia es la clave!</div></div></div>`:'';
+  renderCalendar();
+  const{taken,total}=calcMonthStats(calYear,calMonth);
+  document.getElementById('crea-month').innerHTML=taken+' <span>días</span>';
+  document.getElementById('crea-pct').textContent=total>0?Math.round(taken/total*100)+'%':'—';
+}
+
+function renderCalendar(){
+  const months=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('cal-month-label').textContent=months[calMonth]+' '+calYear;
+  const today=new Date();
+  const firstDay=(new Date(calYear,calMonth,1).getDay()+6)%7;
+  const dim=new Date(calYear,calMonth+1,0).getDate();
+  const dows=['L','M','X','J','V','S','D'];
+  let html=dows.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  for(let i=0;i<firstDay;i++)html+=`<div class="cal-cell empty"></div>`;
+  for(let d=1;d<=dim;d++){
+    const k=dateKey(calYear,calMonth,d);
+    const cd=new Date(calYear,calMonth,d);
+    const isToday=cd.toDateString()===today.toDateString();
+    const isFuture=cd>today;
+    const val=db.creatina[k];
+    let cls='cal-cell';
+    if(isToday)cls+=' today';
+    else if(isFuture)cls+=' future';
+    else if(val===true)cls+=' taken';
+    else if(val===false)cls+=' missed';
+    html+=`<div class="${cls}" onclick="toggleCalDay(${d})">${d}</div>`;
+  }
+  document.getElementById('cal-grid').innerHTML=html;
+}
+function toggleCalDay(d){
+  const k=dateKey(calYear,calMonth,d);
+  const cd=new Date(calYear,calMonth,d);
+  if(cd>new Date())return;
+  db.creatina[k]=db.creatina[k]!==true;
+  saveDb();renderCreatina();
+}
+function prevMonth(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCreatina();}
+function nextMonth(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCreatina();}
+
+function renderWidgetPreview(){
+  const k=todayKey();const val=db.creatina[k];const streak=calcStreak();
+  document.getElementById('wp-emoji').textContent=val===true?'✅':val===false?'❌':'❓';
+  document.getElementById('wp-status-txt').textContent=val===true?'¡Tomada! 💪':val===false?'No tomada hoy':'¿Ya tomaste hoy?';
+  document.getElementById('wp-streak').textContent=streak;
+  const d=new Date();
+  document.getElementById('wp-date').textContent=d.toLocaleDateString('es-AR',{day:'numeric',month:'short'});
+}
+
+function getScriptableCode(){return `// GymLog Rugby — Widget Creatina para Scriptable
+// 1. Instalá Scriptable (App Store, gratis)
+// 2. Pegá este código y guardalo como "Creatina"
+// 3. Agregá el widget Scriptable a tu pantalla de inicio
+
+const KEY = "gymlog_creatina_data";
+const fm = FileManager.local();
+const path = fm.joinPath(fm.documentsDirectory(), KEY + ".json");
+
+function loadData() {
+  if (!fm.fileExists(path)) return {};
+  try { return JSON.parse(fm.readString(path)); } catch(e) { return {}; }
+}
+function saveData(data) { fm.writeString(path, JSON.stringify(data)); }
+function todayKey() {
+  const d = new Date();
+  return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
+}
+function calcStreak(data) {
+  let streak = 0, d = new Date();
+  for (let i = 0; i < 365; i++) {
+    const k = d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
+    if (data[k] === true) { streak++; d.setDate(d.getDate()-1); } else break;
+  }
+  return streak;
+}
+
+if (config.runsInWidget === false) {
+  let data = loadData();
+  const k = todayKey();
+  data[k] = data[k] !== true;
+  saveData(data);
+  Script.complete();
+}
+
+let data = loadData();
+const k = todayKey();
+const taken = data[k] === true;
+const streak = calcStreak(data);
+const w = new ListWidget();
+w.backgroundColor = new Color("#1C1C1E");
+w.url = "scriptable:///run/Creatina";
+
+const topStack = w.addStack();
+topStack.layoutHorizontally();
+topStack.centerAlignContent();
+const iconBg = topStack.addStack();
+iconBg.backgroundColor = new Color("#E24B4A");
+iconBg.cornerRadius = 8;
+iconBg.size = new Size(28, 28);
+iconBg.centerAlignContent();
+const iconTxt = iconBg.addText("💊");
+iconTxt.font = Font.systemFont(14);
+topStack.addSpacer(8);
+const titleStack = topStack.addStack();
+titleStack.layoutVertically();
+const appLbl = titleStack.addText("GymLog");
+appLbl.font = Font.systemFont(9);
+appLbl.textColor = new Color("#FFFFFF", 0.4);
+const titleLbl = titleStack.addText("Creatina");
+titleLbl.font = Font.boldSystemFont(13);
+titleLbl.textColor = Color.white();
+w.addSpacer();
+const centerStack = w.addStack();
+centerStack.layoutVertically();
+centerStack.centerAlignContent();
+const emoji = centerStack.addText(taken ? "✅" : "❓");
+emoji.font = Font.systemFont(28);
+emoji.centerAlignText();
+centerStack.addSpacer(2);
+const statusTxt = centerStack.addText(taken ? "¡Tomada! 💪" : "Tocá para marcar");
+statusTxt.font = Font.systemFont(11);
+statusTxt.textColor = taken ? new Color("#4CAF50") : new Color("#FFFFFF", 0.7);
+statusTxt.centerAlignText();
+w.addSpacer();
+const bottomStack = w.addStack();
+bottomStack.layoutHorizontally();
+const streakStack = bottomStack.addStack();
+streakStack.layoutVertically();
+const streakNum = streakStack.addText("🔥 " + streak);
+streakNum.font = Font.boldSystemFont(18);
+streakNum.textColor = Color.white();
+const streakLbl = streakStack.addText("días racha");
+streakLbl.font = Font.systemFont(9);
+streakLbl.textColor = new Color("#FFFFFF", 0.4);
+bottomStack.addSpacer();
+const d = new Date();
+const dateLbl = bottomStack.addText(d.getDate()+"/"+(d.getMonth()+1));
+dateLbl.font = Font.systemFont(10);
+dateLbl.textColor = new Color("#FFFFFF", 0.3);
+dateLbl.rightAlignText();
+Script.setWidget(w);
+Script.complete();`;}
+
+function copyScript(){
+  const code=getScriptableCode();
+  if(navigator.clipboard){navigator.clipboard.writeText(code).then(()=>toast('Código copiado!')).catch(()=>fallbackCopy(code));}
+  else fallbackCopy(code);
+}
+function fallbackCopy(text){
+  const ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;opacity:0;top:0;left:0';
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');toast('Código copiado!');}catch(e){toast('No se pudo copiar');}
+  document.body.removeChild(ta);
+}
+
+function renderHome(){
+  const weekAgo=Date.now()-7*86400000;
+  const wk=db.workouts.filter(w=>new Date(w.date).getTime()>weekAgo).length;
+  document.getElementById('stat-week').textContent=wk;
+  document.getElementById('stat-streak').innerHTML=calcStreak()+' <span>días</span>';
+  const dg=document.getElementById('day-grid');
+  dg.innerHTML=db.routine.map(day=>{
+    const last=db.workouts.filter(w=>w.dayId===day.id).slice(-1)[0];
+    const lastDate=last?new Date(last.date).toLocaleDateString('es-AR',{day:'numeric',month:'short'}):null;
+    const exCount=day.bloques.reduce((a,b)=>a+b.ejercicios.length,0);
+    return `<div class="day-card" onclick="openDay(${day.id})">
+      <div class="day-label">Día ${day.id}</div>
+      <div class="day-name">${day.name}</div>
+      <div class="day-meta">${exCount} ejercicios · ${day.bloques.length} bloques</div>
+      ${lastDate?`<div class="day-done"><i class="ti ti-check" style="font-size:11px"></i> ${lastDate}</div>`:''}
+    </div>`;
+  }).join('');
+  const hl=document.getElementById('hist-list');
+  if(db.workouts.length===0){hl.innerHTML='<div style="color:var(--hint);font-size:14px;text-align:center;padding:24px 0">Aún no hay sesiones.<br>¡Empezá el primero!</div>';return;}
+  hl.innerHTML=[...db.workouts].reverse().slice(0,6).map(w=>{
+    const d=new Date(w.date);
+    const ds=d.toLocaleDateString('es-AR',{weekday:'short',day:'numeric',month:'short'});
+    const day=db.routine.find(r=>r.id===w.dayId);
+    const ck=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+    const tc=db.creatina[ck];
+    return `<div class="history-item">
+      <div class="hist-header"><span class="hist-name">${day?'Día '+day.id+' — '+day.name:'Sesión'}</span><span class="hist-date">${ds}</span></div>
+      <span class="tag">${w.exCount} ejercicios</span>
+      ${tc===true?'<span class="tag verde">💊 Creatina</span>':tc===false?'<span class="tag">Sin creatina</span>':''}
+    </div>`;
+  }).join('');
+}
+
+function openDay(id){
+  currentDay=JSON.parse(JSON.stringify(db.routine.find(d=>d.id===id)));
+  document.getElementById('sess-title').textContent='Día '+id+' — '+currentDay.name;
+  const c=document.getElementById('sess-content');
+  let html='';
+  currentDay.bloques.forEach((b,bi)=>{
+    html+=`<div class="bloque-title"><span>${b.nombre}</span><span class="bloque-badge">${b.vueltas} vueltas</span></div>`;
+    b.ejercicios.forEach((ex,ei)=>{
+      const rows=ex.sets.map((s,si)=>`<tr>
+        <td class="set-num">${si+1}</td>
+        <td><input class="set-input" type="number" inputmode="decimal" min="0" value="${s.reps||''}" placeholder="—" onchange="updateSet(${bi},${ei},${si},'reps',this.value)"/></td>
+        <td><input class="set-input" type="number" inputmode="decimal" min="0" step="0.5" value="${s.w||''}" placeholder="—" onchange="updateSet(${bi},${ei},${si},'w',this.value)"/></td>
+      </tr>`).join('');
+      html+=`<div class="ex-card">
+        <div class="ex-header">
+          <div>
+            <div class="ex-name">${ex.name}</div>
+            <div class="target-chip">${ex.target}</div>
+          </div>
+          <button class="ex-swap-btn" onclick="swapExercise(${bi},${ei})"><i class="ti ti-refresh"></i> Cambiar</button>
+        </div>
+        <table class="sets-table">
+          <thead><tr><th>Serie</th><th>Reps</th><th>Peso kg</th></tr></thead>
+          <tbody id="sets-${bi}-${ei}">${rows}</tbody>
+        </table>
+        <button class="add-set-btn" onclick="addSet(${bi},${ei})">+ Agregar serie</button>
+        ${ex.note?`<div class="ex-note">💡 ${ex.note}</div>`:''}
+      </div>`;
+    });
+  });
+  html+=`<button class="save-btn" onclick="saveSession()"><i class="ti ti-device-floppy"></i> Guardar sesión</button><div style="height:20px"></div>`;
+  c.innerHTML=html;
+  show('session');
+}
+function updateSet(bi,ei,si,f,v){currentDay.bloques[bi].ejercicios[ei].sets[si][f]=v;}
+function addSet(bi,ei){
+  const ex=currentDay.bloques[bi].ejercicios[ei];
+  ex.sets.push({reps:'',w:''});
+  const tbody=document.getElementById('sets-'+bi+'-'+ei);
+  const si=ex.sets.length-1;
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td class="set-num">${si+1}</td>
+    <td><input class="set-input" type="number" inputmode="decimal" min="0" placeholder="—" onchange="updateSet(${bi},${ei},${si},'reps',this.value)"/></td>
+    <td><input class="set-input" type="number" inputmode="decimal" min="0" step="0.5" placeholder="—" onchange="updateSet(${bi},${ei},${si},'w',this.value)"/></td>`;
+  tbody.appendChild(tr);
+}
+function swapExercise(bi,ei){
+  const ex=currentDay.bloques[bi].ejercicios[ei];
+  const msg=`Quiero cambiar "${ex.name}" (${ex.target}) del Día ${currentDay.id} — ${currentDay.name}. Sugerí 2-3 ejercicios alternativos para rugby con objetivo similar.`;
+  tab('coach');
+  setTimeout(()=>{document.getElementById('chat-in').value=msg;sendMsg();},300);
+}
+function saveSession(){
+  let exCount=0,totalSets=0;const bests={};
+  currentDay.bloques.forEach(b=>{b.ejercicios.forEach(ex=>{exCount++;ex.sets.forEach(s=>{if(s.reps||s.w)totalSets++;if(s.w&&parseFloat(s.w)>0){if(!bests[ex.name]||parseFloat(s.w)>bests[ex.name])bests[ex.name]=parseFloat(s.w);}});});});
+  db.workouts.push({id:Date.now(),dayId:currentDay.id,date:new Date().toISOString(),exCount,totalSets,bests});
+  saveDb();toast('Sesión guardada 💪');show('home');renderHome();
+}
+
+function renderProgress(){
+  document.getElementById('ps-total').textContent=db.workouts.length;
+  const allEx=new Set();const bests={};
+  db.workouts.forEach(w=>{Object.entries(w.bests||{}).forEach(([n,v])=>{allEx.add(n);if(!bests[n]||v>bests[n])bests[n]=v;});});
+  document.getElementById('ps-exs').textContent=allEx.size;
+  const bl=document.getElementById('bests-list');
+  if(allEx.size===0){bl.innerHTML='<div style="color:var(--hint);font-size:14px;text-align:center;padding:24px 0">Registrá sesiones con peso<br>para ver tus marcas aquí.</div>';return;}
+  bl.innerHTML=[...allEx].map(n=>`<div class="prog-ex-item"><div class="prog-ex-name">${n}</div><div class="prog-ex-best">🏆 Mejor marca: ${bests[n]} kg</div></div>`).join('');
+}
+
+function buildSystemPrompt(){
+  const rs=db.routine.map(d=>`Día ${d.id} (${d.name}): ${d.bloques.map(b=>b.ejercicios.map(e=>e.name).join(', ')).join(' | ')}`).join('\n');
+  const streak=calcStreak();
+  const{taken,total}=calcMonthStats(now.getFullYear(),now.getMonth());
+  const pct=total>0?Math.round(taken/total*100)+'%':'sin datos';
+  return `Sos un entrenador de fuerza y acondicionamiento físico especializado en rugby. Sos directo, práctico y conocés profundamente la preparación física para rugby: fuerza en el scrum, potencia explosiva, resistencia especial y prevención de lesiones.\n\nRUTINA ACTUAL (4 días):\n${rs}\n\nCREATINA:\n- Racha actual: ${streak} días consecutivos\n- Consistencia este mes: ${taken}/${total} días (${pct})\n\nSESIONES TOTALES REGISTRADAS: ${db.workouts.length}\n\nCuando sugerís cambios de ejercicios, dá opciones concretas con sets/reps. Sobre creatina, recordá que la consistencia diaria importa más que el timing. Sé conciso — 3-5 oraciones salvo que pidan más. Respondé siempre en español rioplatense (vos, che, etc).`;
+}
+async function sendMsg(){
+  const input=document.getElementById('chat-in');
+  const text=input.value.trim();if(!text)return;
+  input.value='';
+  document.getElementById('quick-btns').style.display='none';
+  appendMsg(text,'user');
+  const loading=appendMsg('<i class="ti ti-dots"></i>','ai loading');
+  chatHistory.push({role:'user',content:text});
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:buildSystemPrompt(),messages:chatHistory})});
+    const data=await res.json();
+    const reply=data.content?.map(c=>c.text||'').join('')||'No pude responder, intentá de nuevo.';
+    chatHistory.push({role:'assistant',content:reply});
+    loading.remove();appendMsg(reply,'ai');
+  }catch(e){loading.remove();appendMsg('Error de conexión. Revisá tu red.','ai');}
+}
+function appendMsg(html,cls){
+  const ca=document.getElementById('chat-area');
+  const d=document.createElement('div');d.className='msg '+cls;d.innerHTML=html;
+  ca.appendChild(d);ca.scrollTop=ca.scrollHeight;return d;
+}
+function quickMsg(msg){document.getElementById('chat-in').value=msg;sendMsg();}
+
+function getDefaultRoutine(){return [{id:1,name:"Empuje + Core",bloques:[{nombre:"Bloque 1",vueltas:2,ejercicios:[{id:'e1',name:"Press banca",target:"5 reps",note:"Fuerza máxima — explosivo en el ascenso",sets:[{reps:'',w:''},{reps:'',w:''}]},{id:'e2',name:"Plancha",target:"45 s",note:"Core estabilizador — fundamental para el contacto",sets:[{reps:'45s',w:''},{reps:'45s',w:''}]},{id:'e3',name:"Dominadas / Jalón",target:"6-8 reps",note:"Pull antagonista — cuida los hombros",sets:[{reps:'',w:''},{reps:'',w:''}]},{id:'e4',name:"Remo con barra",target:"8 reps",note:"Espalda alta — clave en scrum y tackle",sets:[{reps:'',w:''},{reps:'',w:''}]}]},{nombre:"Bloque 2",vueltas:2,ejercicios:[{id:'e5',name:"Press militar",target:"6 reps",note:"Fuerza de empuje vertical",sets:[{reps:'',w:''},{reps:'',w:''}]},{id:'e6',name:"Jalón al pecho agarre neutro",target:"8 reps",note:"Dorsal + bíceps",sets:[{reps:'',w:''},{reps:'',w:''}]},{id:'e7',name:"Saltos explosivos con flexión",target:"5 reps",note:"Potencia reactiva — específico rugby",sets:[{reps:'',w:''},{reps:'',w:''}]}]}]},{id:2,name:"Piernas + Explosividad",bloques:[{nombre:"Bloque 1",vueltas:4,ejercicios:[{id:'e8',name:"Squat jumps",target:"5 reps",note:"Potencia tren inferior — aceleración",sets:[{reps:'',w:''},{reps:'',w:''},{reps:'',w:''},{reps:'',w:''}]},{id:'e9',name:"Sentadilla",target:"5 reps",note:"Base de fuerza — peso progresivo",sets:[{reps:'',w:''},{reps:'',w:''},{reps:'',w:''},{reps:'',w:''}]},{id:'e10',name:"Ab wheel",target:"10 reps",note:"Core anti-extensión",sets:[{reps:'',w:''},{reps:'',w:''},{reps:'',w:''},{reps:'',w:''}]}]},{nombre:"Bloque 2",vueltas:4,ejercicios:[{id:'e11',name:"Peso muerto rumano",target:"6 reps",note:"Cadena posterior — isquios y glúteos",sets:[{reps:'',w:''},{reps:'',w:''},{reps:'',w:''},{reps:'',w:''}]},{id:'e12',name:"Bulgarian split squat",target:"8 c/pierna",note:"Unilateral — corrige asimetrías",sets:[{reps:'',w:''},{reps:'',w:''},{reps:'',w:''},{reps:'',w:''}]},{id:'e13',name:"Gemelos",target:"15 reps",note:"Resistencia a lesiones + agilidad",sets:[{reps:'',w:''},{reps:'',w:''},{reps:'',w:''},{reps:'',w:''}]}]}]},{id:3,name:"Hombros + Espalda",bloques:[{nombre:"Bloque 1",vueltas:4,ejercicios:[{id:'e14',name:"Press inclinado mancuerna",target:"10 reps",note:"Pectoral superior + estabilizadores",sets:[{reps:'',w:''},{reps:'',w:''},{reps:'',w:''},{reps:'',w:''}]},{id:'e15',name:"Dominadas / Jalón",target:"10 reps",note:"Dorsal ancho — potencia en el tackle",sets:[{reps:'',w:''},{reps:'',w:''},{reps:'',w:''},{reps:'',w:''}]},{id:'e16',name:"Elevaciones laterales",target:"15 reps",note:"Deltoides medial — protección hombro",sets:[{reps:'',w:''},{reps:'',w:''},{reps:'',w:''},{reps:'',w:''}]}]},{nombre:"Bloque 2",vueltas:4,ejercicios:[{id:'e17',name:"Remo gorila",target:"10 reps",note:"Espalda baja + dorsal",sets:[{reps:'',w:''},{reps:'',w:''},{reps:'',w:''},{reps:'',w:''}]},{id:'e18',name:"Press militar mancuerna",target:"10 reps",note:"Fuerza de empuje — rango completo",sets:[{reps:'',w:''},{reps:'',w:''},{reps:'',w:''},{reps:'',w:''}]},{id:'e19',name:"Remo con barra",target:"8 reps",note:"Espalda alta + bíceps",sets:[{reps:'',w:''},{reps:'',w:''},{reps:'',w:''},{reps:'',w:''}]}]}]},{id:4,name:"Cadena posterior + Potencia",bloques:[{nombre:"Bloque 1",vueltas:4,ejercicios:[{id:'e20',name:"Peso muerto",target:"5 reps",note:"Rey de la fuerza — técnica perfecta",sets:[{reps:'',w:''},{reps:'',w:''},{reps:'',w:''},{reps:'',w:''}]},{id:'e21',name:"Box jumps",target:"5 reps",note:"Potencia explosiva — sprints rugby",sets:[{reps:'',w:''},{reps:'',w:''},{reps:'',w:''},{reps:'',w:''}]},{id:'e22',name:"Russian twists",target:"15 reps",note:"Rotación de core — pases y tackles",sets:[{reps:'',w:''},{reps:'',w:''},{reps:'',w:''},{reps:'',w:''}]}]},{nombre:"Bloque 2",vueltas:4,ejercicios:[{id:'e23',name:"Front squat / Prensa",target:"8 reps",note:"Cuádriceps — fuerza de scrum",sets:[{reps:'',w:''},{reps:'',w:''},{reps:'',w:''},{reps:'',w:''}]},{id:'e24',name:"Zancadas caminando",target:"10 c/pierna",note:"Unilateral + estabilidad dinámica",sets:[{reps:'',w:''},{reps:'',w:''},{reps:'',w:''},{reps:'',w:''}]},{id:'e25',name:"Curl femoral",target:"12 reps",note:"Isquios — prevención lesiones",sets:[{reps:'',w:''},{reps:'',w:''},{reps:'',w:''},{reps:'',w:''}]}]}]}];}
+
+renderHome();
+</script>
+</body>
+</html>
